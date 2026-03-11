@@ -361,13 +361,17 @@ final class Easy_WhatsApp_Plugin {
 	 * @param string $meta_key  Meta key.
 	 * @param int    $object_id Post ID.
 	 * @param int    $user_id   User ID.
+	 * @param string $cap       Capability name.
+	 * @param array  $caps      User capabilities.
 	 *
 	 * @return bool
 	 */
-	public function can_edit_meta( $allowed, $meta_key, $object_id, $user_id ) {
-		unset( $allowed, $meta_key );
+	public function can_edit_meta( $allowed, $meta_key, $object_id, $user_id, $cap = '' ) {
+		if ( 'edit_post_meta' === $cap || 'add_post_meta' === $cap || 'delete_post_meta' === $cap ) {
+			return user_can( (int) $user_id, 'edit_post', (int) $object_id );
+		}
 
-		return user_can( (int) $user_id, 'edit_post', (int) $object_id );
+		return true;
 	}
 
 	/**
