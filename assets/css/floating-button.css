@@ -1,0 +1,58 @@
+/**
+ * Floating WhatsApp Button CSS
+ */
+
+ .easy-whatsapp-floating-button {
+	position: fixed;
+	bottom: 25px;
+	right: 25px;
+	width: 60px;
+	height: 60px;
+	background-color: #25D366; /* Official WhatsApp color */
+	color: #fff;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+	z-index: 99999;
+	text-decoration: none;
+	transition: all 0.3s ease;
+	cursor: pointer;
+}
+
+.easy-whatsapp-floating-button svg {
+	width: 35px;
+	height: 35px;
+	fill: currentColor;
+	transition: transform 0.3s ease;
+}
+
+.easy-whatsapp-floating-button:hover,
+.easy-whatsapp-floating-button:focus {
+	background-color: #1ebe57; /* Slightly darker green on hover */
+	box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.4);
+	transform: translateY(-3px);
+	outline: none;
+}
+
+.easy-whatsapp-floating-button:hover svg {
+	transform: scale(1.1);
+}
+
+/* Optional: animation on load to draw attention */
+@keyframes easy-whatsapp-bounce {
+	0%, 20%, 50%, 80%, 100% {
+		transform: translateY(0);
+	}
+	40% {
+		transform: translateY(-10px);
+	}
+	60% {
+		transform: translateY(-5px);
+	}
+}
+
+.easy-whatsapp-floating-button.animate {
+	animation: easy-whatsapp-bounce 2s infinite;
+}
