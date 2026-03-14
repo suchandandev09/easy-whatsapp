@@ -409,103 +409,103 @@ final class Easy_WhatsApp_Plugin
 					</div>
 				</div>
 
-			<table class="wp-list-table widefat fixed striped table-view-list">
-				<thead>
-					<tr>
-						<?php foreach ($sortable_columns as $column_key => $column_label) : ?>
-							<?php
-							$next_order   = ('asc' === $order && $orderby === $column_key) ? 'desc' : 'asc';
-							$sort_classes = array('manage-column', 'sortable');
-							if ($orderby === $column_key) {
-								$sort_classes = array('manage-column', 'sorted', $order);
-							} else {
-								$sort_classes[] = $next_order;
-							}
+				<table class="wp-list-table widefat fixed striped table-view-list">
+					<thead>
+						<tr>
+							<?php foreach ($sortable_columns as $column_key => $column_label) : ?>
+								<?php
+								$next_order   = ('asc' === $order && $orderby === $column_key) ? 'desc' : 'asc';
+								$sort_classes = array('manage-column', 'sortable');
+								if ($orderby === $column_key) {
+									$sort_classes = array('manage-column', 'sorted', $order);
+								} else {
+									$sort_classes[] = $next_order;
+								}
 
-							$sort_url = add_query_arg(
-								array_merge(
-									$pagination_args,
-									array(
-										'orderby' => $column_key,
-										'order'   => $next_order,
-										'paged'   => 1,
-									)
-								),
-								$base_url
-							);
-							?>
-							<th scope="col" class="<?php echo esc_attr(implode(' ', $sort_classes)); ?> column-<?php echo esc_attr($column_key); ?>">
-								<a href="<?php echo esc_url($sort_url); ?>">
-									<span><?php echo esc_html($column_label); ?></span>
-									<span class="sorting-indicators">
-										<span class="sorting-indicator asc" aria-hidden="true"></span>
-										<span class="sorting-indicator desc" aria-hidden="true"></span>
-									</span>
-								</a>
-							</th>
-						<?php endforeach; ?>
-						<th scope="col" class="manage-column column-post"><?php esc_html_e('Post', 'easy-whatsapp'); ?></th>
-						<th scope="col" class="manage-column column-page-url"><?php esc_html_e('Page URL', 'easy-whatsapp'); ?></th>
-					</tr>
-				</thead>
-				<tfoot>
-					<tr>
-						<?php foreach ($sortable_columns as $column_key => $column_label) : ?>
-							<th scope="col" class="manage-column column-<?php echo esc_attr($column_key); ?>"><?php echo esc_html($column_label); ?></th>
-						<?php endforeach; ?>
-						<th scope="col" class="manage-column column-post"><?php esc_html_e('Post', 'easy-whatsapp'); ?></th>
-						<th scope="col" class="manage-column column-page-url"><?php esc_html_e('Page URL', 'easy-whatsapp'); ?></th>
-					</tr>
-				</tfoot>
-				<tbody>
-					<?php if (empty($leads)) : ?>
-						<tr class="no-items">
-							<td class="colspanchange" colspan="8"><?php esc_html_e('No leads found yet.', 'easy-whatsapp'); ?></td>
+								$sort_url = add_query_arg(
+									array_merge(
+										$pagination_args,
+										array(
+											'orderby' => $column_key,
+											'order'   => $next_order,
+											'paged'   => 1,
+										)
+									),
+									$base_url
+								);
+								?>
+								<th scope="col" class="<?php echo esc_attr(implode(' ', $sort_classes)); ?> column-<?php echo esc_attr($column_key); ?>">
+									<a href="<?php echo esc_url($sort_url); ?>">
+										<span><?php echo esc_html($column_label); ?></span>
+										<span class="sorting-indicators">
+											<span class="sorting-indicator asc" aria-hidden="true"></span>
+											<span class="sorting-indicator desc" aria-hidden="true"></span>
+										</span>
+									</a>
+								</th>
+							<?php endforeach; ?>
+							<th scope="col" class="manage-column column-post"><?php esc_html_e('Post', 'easy-whatsapp'); ?></th>
+							<th scope="col" class="manage-column column-page-url"><?php esc_html_e('Page URL', 'easy-whatsapp'); ?></th>
 						</tr>
-					<?php else : ?>
-						<?php foreach ($leads as $lead) : ?>
-							<tr>
-								<td><?php echo esc_html((string) absint($lead['id'])); ?></td>
-								<td><?php echo esc_html(mysql2date(get_option('date_format') . ' ' . get_option('time_format'), $lead['created_at'])); ?></td>
-								<td><?php echo esc_html($lead['name']); ?></td>
-								<td><?php echo esc_html($lead['phone']); ?></td>
-								<td><?php echo '' !== $lead['email'] ? esc_html($lead['email']) : esc_html__('--', 'easy-whatsapp'); ?></td>
-								<td><?php echo esc_html($lead['whatsapp_number']); ?></td>
-								<td>
-									<?php
-									$post_id = absint($lead['post_id']);
-									if ($post_id > 0) {
-										$post_title = get_the_title($post_id);
-										$edit_link  = get_edit_post_link($post_id);
-
-										if (! empty($edit_link)) {
-											echo '<a href="' . esc_url($edit_link) . '">' . esc_html($post_title ? $post_title : sprintf(__('Post #%d', 'easy-whatsapp'), $post_id)) . '</a>';
-										} else {
-											echo esc_html($post_title ? $post_title : sprintf(__('Post #%d', 'easy-whatsapp'), $post_id));
-										}
-									} else {
-										echo esc_html__('--', 'easy-whatsapp');
-									}
-									?>
-								</td>
-								<td>
-									<?php if (! empty($lead['page_url'])) : ?>
-										<a href="<?php echo esc_url($lead['page_url']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('View Page', 'easy-whatsapp'); ?></a>
-									<?php else : ?>
-										<?php esc_html_e('--', 'easy-whatsapp'); ?>
-									<?php endif; ?>
-								</td>
+					</thead>
+					<tfoot>
+						<tr>
+							<?php foreach ($sortable_columns as $column_key => $column_label) : ?>
+								<th scope="col" class="manage-column column-<?php echo esc_attr($column_key); ?>"><?php echo esc_html($column_label); ?></th>
+							<?php endforeach; ?>
+							<th scope="col" class="manage-column column-post"><?php esc_html_e('Post', 'easy-whatsapp'); ?></th>
+							<th scope="col" class="manage-column column-page-url"><?php esc_html_e('Page URL', 'easy-whatsapp'); ?></th>
+						</tr>
+					</tfoot>
+					<tbody>
+						<?php if (empty($leads)) : ?>
+							<tr class="no-items">
+								<td class="colspanchange" colspan="8"><?php esc_html_e('No leads found yet.', 'easy-whatsapp'); ?></td>
 							</tr>
-						<?php endforeach; ?>
-					<?php endif; ?>
-				</tbody>
-			</table>
+						<?php else : ?>
+							<?php foreach ($leads as $lead) : ?>
+								<tr>
+									<td><?php echo esc_html((string) absint($lead['id'])); ?></td>
+									<td><?php echo esc_html(mysql2date(get_option('date_format') . ' ' . get_option('time_format'), $lead['created_at'])); ?></td>
+									<td><?php echo esc_html($lead['name']); ?></td>
+									<td><?php echo esc_html($lead['phone']); ?></td>
+									<td><?php echo '' !== $lead['email'] ? esc_html($lead['email']) : esc_html__('--', 'easy-whatsapp'); ?></td>
+									<td><?php echo esc_html($lead['whatsapp_number']); ?></td>
+									<td>
+										<?php
+										$post_id = absint($lead['post_id']);
+										if ($post_id > 0) {
+											$post_title = get_the_title($post_id);
+											$edit_link  = get_edit_post_link($post_id);
 
-			<?php if (! empty($page_links)) : ?>
-				<div class="tablenav bottom">
-					<div class="tablenav-pages"><?php echo wp_kses_post($page_links); ?></div>
-				</div>
-			<?php endif; ?>
+											if (! empty($edit_link)) {
+												echo '<a href="' . esc_url($edit_link) . '">' . esc_html($post_title ? $post_title : sprintf(__('Post #%d', 'easy-whatsapp'), $post_id)) . '</a>';
+											} else {
+												echo esc_html($post_title ? $post_title : sprintf(__('Post #%d', 'easy-whatsapp'), $post_id));
+											}
+										} else {
+											echo esc_html__('--', 'easy-whatsapp');
+										}
+										?>
+									</td>
+									<td>
+										<?php if (! empty($lead['page_url'])) : ?>
+											<a href="<?php echo esc_url($lead['page_url']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('View Page', 'easy-whatsapp'); ?></a>
+										<?php else : ?>
+											<?php esc_html_e('--', 'easy-whatsapp'); ?>
+										<?php endif; ?>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+						<?php endif; ?>
+					</tbody>
+				</table>
+
+				<?php if (! empty($page_links)) : ?>
+					<div class="tablenav bottom">
+						<div class="tablenav-pages"><?php echo wp_kses_post($page_links); ?></div>
+					</div>
+				<?php endif; ?>
 			</form>
 		</div>
 	<?php
@@ -586,6 +586,8 @@ final class Easy_WhatsApp_Plugin
 	 */
 	private function get_available_post_types()
 	{
+		$excluded_post_types = array('attachment', 'wp_navigation', 'wp_block');
+
 		$post_type_objects = get_post_types(
 			array(
 				'show_ui' => true,
@@ -606,6 +608,10 @@ final class Easy_WhatsApp_Plugin
 
 			$slug = sanitize_key((string) $post_type_object->name);
 			if ('' === $slug) {
+				continue;
+			}
+
+			if (in_array($slug, $excluded_post_types, true)) {
 				continue;
 			}
 
