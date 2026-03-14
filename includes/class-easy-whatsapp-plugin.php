@@ -36,6 +36,12 @@ final class Easy_WhatsApp_Plugin
 	 * Option name for selected post types.
 	 */
 	private const OPTION_POST_TYPES = 'easy_whatsapp_post_types';
+	private const OPTION_LEADS_TABLE_VERSION = 'easy_whatsapp_leads_table_version';
+
+	/**
+	 * Nonce action for lead save AJAX.
+	 */
+	private const LEAD_NONCE_ACTION = 'easy_whatsapp_save_lead';
 
 	/**
 	 * Plugin singleton instance.
@@ -64,6 +70,7 @@ final class Easy_WhatsApp_Plugin
 	private function __construct()
 	{
 		add_action('plugins_loaded', array($this, 'load_textdomain'));
+		add_action('init', array($this, 'maybe_create_leads_table'), 5);
 		add_action('init', array($this, 'register_post_meta_fields'));
 		add_action('add_meta_boxes', array($this, 'register_meta_boxes'));
 		add_action('save_post', array($this, 'save_meta_box'));
@@ -73,6 +80,79 @@ final class Easy_WhatsApp_Plugin
 		// Frontend hooks for floating button
 		add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_scripts'));
 		add_action('wp_footer', array($this, 'render_floating_button'));
+		add_action('wp_ajax_easy_whatsapp_save_lead', array($this, 'ajax_save_lead'));
+		add_action('wp_ajax_nopriv_easy_whatsapp_save_lead', array($this, 'ajax_save_lead'));
+	}
+
+	/**
+	 * Activation callback.
+	 *
+	 * @return void
+	 */
+	public static function activate()
+	{
+		self::create_leads_table();
+		update_option(self::OPTION_LEADS_TABLE_VERSION, EASY_WHATSAPP_VERSION);
+	}
+
+	/**
+	 * Returns leads table name.
+	 *
+	 * @return string
+	 */
+	public static function get_leads_table_name()
+	{
+		global $wpdb;
+
+		return $wpdb->prefix . 'easy_whatsapp_leads';
+	}
+
+	/**
+	 * Creates leads table if it does not exist.
+	 *
+	 * @return void
+	 */
+	public static function create_leads_table()
+	{
+		global $wpdb;
+
+		$table_name      = self::get_leads_table_name();
+		$charset_collate = $wpdb->get_charset_collate();
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		$sql = "CREATE TABLE {$table_name} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			post_id bigint(20) unsigned NOT NULL DEFAULT 0,
+			whatsapp_number varchar(20) NOT NULL DEFAULT '',
+			name varchar(190) NOT NULL DEFAULT '',
+			phone varchar(30) NOT NULL DEFAULT '',
+			email varchar(190) NOT NULL DEFAULT '',
+			page_url text NOT NULL,
+			created_at datetime NOT NULL,
+			PRIMARY KEY  (id),
+			KEY post_id (post_id),
+			KEY created_at (created_at)
+		) {$charset_collate};";
+
+		dbDelta($sql);
+	}
+
+	/**
+	 * Creates or upgrades leads table when needed.
+	 *
+	 * @return void
+	 */
+	public function maybe_create_leads_table()
+	{
+		$stored_version = get_option(self::OPTION_LEADS_TABLE_VERSION, '');
+
+		if (EASY_WHATSAPP_VERSION === $stored_version) {
+			return;
+		}
+
+		self::create_leads_table();
+		update_option(self::OPTION_LEADS_TABLE_VERSION, EASY_WHATSAPP_VERSION);
 	}
 
 	/**
@@ -609,6 +689,86 @@ final class Easy_WhatsApp_Plugin
 			EASY_WHATSAPP_VERSION,
 			true
 		);
+
+		wp_localize_script(
+			'easy-whatsapp-floating-button',
+			'easyWhatsappData',
+			array(
+				'ajaxUrl' => admin_url('admin-ajax.php'),
+				'nonce'   => wp_create_nonce(self::LEAD_NONCE_ACTION),
+				'action'  => 'easy_whatsapp_save_lead',
+			)
+		);
+	}
+
+	/**
+	 * Saves lead data from modal form via AJAX.
+	 *
+	 * @return void
+	 */
+	public function ajax_save_lead()
+	{
+		check_ajax_referer(self::LEAD_NONCE_ACTION, 'nonce');
+
+		$name = '';
+		if (isset($_POST['name'])) {
+			$name = sanitize_text_field(wp_unslash($_POST['name']));
+		}
+
+		$phone = '';
+		if (isset($_POST['phone'])) {
+			$phone = sanitize_text_field(wp_unslash($_POST['phone']));
+		}
+
+		$email = '';
+		if (isset($_POST['email'])) {
+			$email = sanitize_email(wp_unslash($_POST['email']));
+		}
+
+		$post_id = 0;
+		if (isset($_POST['post_id'])) {
+			$post_id = absint($_POST['post_id']);
+		}
+
+		$whatsapp_number = '';
+		if (isset($_POST['whatsapp_number'])) {
+			$whatsapp_number = $this->sanitize_whatsapp_number(wp_unslash($_POST['whatsapp_number']));
+		}
+
+		$page_url = '';
+		if (isset($_POST['page_url'])) {
+			$page_url = esc_url_raw(wp_unslash($_POST['page_url']));
+		}
+
+		if ('' === $name || '' === $phone || '' === $whatsapp_number) {
+			wp_send_json_error(array('message' => __('Missing required fields.', 'easy-whatsapp')), 400);
+		}
+
+		if ('' !== $email && ! is_email($email)) {
+			wp_send_json_error(array('message' => __('Invalid email address.', 'easy-whatsapp')), 400);
+		}
+
+		global $wpdb;
+
+		$inserted = $wpdb->insert(
+			self::get_leads_table_name(),
+			array(
+				'post_id'          => $post_id,
+				'whatsapp_number'  => $whatsapp_number,
+				'name'             => $name,
+				'phone'            => $phone,
+				'email'            => $email,
+				'page_url'         => $page_url,
+				'created_at'       => current_time('mysql'),
+			),
+			array('%d', '%s', '%s', '%s', '%s', '%s', '%s')
+		);
+
+		if (false === $inserted) {
+			wp_send_json_error(array('message' => __('Failed to store lead.', 'easy-whatsapp')), 500);
+		}
+
+		wp_send_json_success(array('message' => __('Lead saved successfully.', 'easy-whatsapp')));
 	}
 
 	/**
@@ -644,8 +804,9 @@ final class Easy_WhatsApp_Plugin
 		</svg>';
 
 		printf(
-			'<a href="#" class="easy-whatsapp-floating-button animate" data-number="%1$s" title="%2$s" aria-haspopup="dialog" aria-controls="easy-whatsapp-modal">%3$s</a>',
+			'<a href="#" class="easy-whatsapp-floating-button animate" data-number="%1$s" data-post-id="%2$d" title="%3$s" aria-haspopup="dialog" aria-controls="easy-whatsapp-modal">%4$s</a>',
 			esc_attr($number),
+			(int) $post_id,
 			esc_attr__('Message us on WhatsApp', 'easy-whatsapp'),
 			$svg_icon
 		);

@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	var form = modal ? modal.querySelector('.easy-whatsapp-lead-form') : null;
 	var errorBox = modal ? modal.querySelector('.easy-whatsapp-form-error') : null;
 	var activeNumber = '';
+	var activePostId = 0;
 
 	if (!modal || !form) {
 		return;
@@ -33,8 +34,36 @@ document.addEventListener('DOMContentLoaded', function () {
 		return baseUrl + '&text=' + encodeURIComponent(message);
 	}
 
-	function openModal(number) {
+	function saveLeadData(name, phone, email) {
+		if (!window.easyWhatsappData || !window.easyWhatsappData.ajaxUrl || !window.easyWhatsappData.nonce || !window.easyWhatsappData.action) {
+			return;
+		}
+
+		var payload = new URLSearchParams();
+		payload.append('action', window.easyWhatsappData.action);
+		payload.append('nonce', window.easyWhatsappData.nonce);
+		payload.append('name', name);
+		payload.append('phone', phone);
+		payload.append('email', email);
+		payload.append('post_id', String(activePostId));
+		payload.append('whatsapp_number', activeNumber);
+		payload.append('page_url', window.location.href);
+
+		fetch(window.easyWhatsappData.ajaxUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+			},
+			credentials: 'same-origin',
+			body: payload.toString()
+		}).catch(function () {
+			// Keep redirect behavior even if storing fails.
+		});
+	}
+
+	function openModal(number, postId) {
 		activeNumber = number || '';
+		activePostId = postId || 0;
 		modal.hidden = false;
 		document.body.classList.add('easy-whatsapp-modal-open');
 
@@ -61,11 +90,12 @@ document.addEventListener('DOMContentLoaded', function () {
 			e.preventDefault();
 
 			var number = this.getAttribute('data-number');
+			var postId = parseInt(this.getAttribute('data-post-id') || '0', 10);
 			if (!number) {
 				return;
 			}
 
-			openModal(number);
+			openModal(number, postId);
 		});
 	});
 
@@ -118,6 +148,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 			return;
 		}
+
+		saveLeadData(name, phone, email);
 
 		window.open(url, '_blank', 'noopener,noreferrer');
 		form.reset();

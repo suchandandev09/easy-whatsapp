@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Uninstall logic for Easy WhatsApp plugin.
  *
  * @package EasyWhatsApp
  */
 
-if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+if (! defined('WP_UNINSTALL_PLUGIN')) {
 	exit;
 }
 
@@ -17,3 +18,7 @@ $wpdb->query(
 		'_easy_whatsapp_number'
 	)
 );
+
+$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}easy_whatsapp_leads");
+
+delete_option('easy_whatsapp_leads_table_version');
