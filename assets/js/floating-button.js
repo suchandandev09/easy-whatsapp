@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	var modal = document.getElementById('easy-whatsapp-modal');
 	var form = modal ? modal.querySelector('.easy-whatsapp-lead-form') : null;
 	var errorBox = modal ? modal.querySelector('.easy-whatsapp-form-error') : null;
+	var loadingBox = modal ? modal.querySelector('.easy-whatsapp-loading') : null;
 	var activeNumber = '';
 	var activePostId = 0;
 
@@ -36,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	function saveLeadData(name, phone, email) {
 		if (!window.easyWhatsappData || !window.easyWhatsappData.ajaxUrl || !window.easyWhatsappData.nonce || !window.easyWhatsappData.action) {
-			return;
+			return Promise.reject(new Error('Lead save API is not configured.'));
 		}
 
 		var payload = new URLSearchParams();
@@ -49,15 +50,26 @@ document.addEventListener('DOMContentLoaded', function () {
 		payload.append('whatsapp_number', activeNumber);
 		payload.append('page_url', window.location.href);
 
-		fetch(window.easyWhatsappData.ajaxUrl, {
+		return fetch(window.easyWhatsappData.ajaxUrl, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
 			},
 			credentials: 'same-origin',
 			body: payload.toString()
-		}).catch(function () {
-			// Keep redirect behavior even if storing fails.
+		}).then(function (response) {
+			return response.json().catch(function () {
+				throw new Error('Unexpected API response.');
+			}).then(function (data) {
+				if (!response.ok || !data || data.success !== true) {
+					var errorMessage = (data && data.data && data.data.message)
+						? String(data.data.message)
+						: 'Failed to store lead data. Please try again.';
+					throw new Error(errorMessage);
+				}
+
+				return data;
+			});
 		});
 	}
 
@@ -66,6 +78,10 @@ document.addEventListener('DOMContentLoaded', function () {
 		activePostId = postId || 0;
 		modal.hidden = false;
 		document.body.classList.add('easy-whatsapp-modal-open');
+
+		if (loadingBox) {
+			loadingBox.hidden = true;
+		}
 
 		if (errorBox) {
 			errorBox.textContent = '';
@@ -80,6 +96,9 @@ document.addEventListener('DOMContentLoaded', function () {
 	function closeModal() {
 		modal.hidden = true;
 		document.body.classList.remove('easy-whatsapp-modal-open');
+		if (loadingBox) {
+			loadingBox.hidden = true;
+		}
 		if (errorBox) {
 			errorBox.textContent = '';
 		}
@@ -149,10 +168,36 @@ document.addEventListener('DOMContentLoaded', function () {
 			return;
 		}
 
-		saveLeadData(name, phone, email);
+		var submitButton = form.querySelector('.easy-whatsapp-submit');
+		if (submitButton) {
+			submitButton.disabled = true;
+		}
 
-		window.open(url, '_blank', 'noopener,noreferrer');
-		form.reset();
-		closeModal();
+		if (loadingBox) {
+			loadingBox.hidden = false;
+		}
+
+		saveLeadData(name, phone, email)
+			.then(function () {
+				window.open(url, '_blank', 'noopener,noreferrer');
+				form.reset();
+				closeModal();
+			})
+			.catch(function (error) {
+				if (errorBox) {
+					errorBox.textContent = error && error.message
+						? error.message
+						: 'Failed to save details. Please try again.';
+				}
+			})
+			.finally(function () {
+				if (submitButton) {
+					submitButton.disabled = false;
+				}
+
+				if (loadingBox) {
+					loadingBox.hidden = true;
+				}
+			});
 	});
 });

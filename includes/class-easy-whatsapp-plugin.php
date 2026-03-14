@@ -815,6 +815,10 @@ final class Easy_WhatsApp_Plugin
 			'<div id="easy-whatsapp-modal" class="easy-whatsapp-modal" hidden>' .
 				'<div class="easy-whatsapp-modal-backdrop" data-easy-whatsapp-close="1"></div>' .
 				'<div class="easy-whatsapp-modal-content" role="dialog" aria-modal="true" aria-labelledby="easy-whatsapp-modal-title">' .
+				'<div class="easy-whatsapp-loading" hidden aria-live="polite" aria-busy="true">' .
+				'<span class="easy-whatsapp-loading-spinner" aria-hidden="true"></span>' .
+				'<span class="easy-whatsapp-loading-text">%7$s</span>' .
+				'</div>' .
 				'<button type="button" class="easy-whatsapp-modal-close" data-easy-whatsapp-close="1" aria-label="%1$s">&times;</button>' .
 				'<h2 id="easy-whatsapp-modal-title">%2$s</h2>' .
 				'<form class="easy-whatsapp-lead-form" novalidate>' .
@@ -834,7 +838,8 @@ final class Easy_WhatsApp_Plugin
 			wp_kses_post(sprintf('%1$s <span class="easy-whatsapp-required" aria-hidden="true">*</span>', esc_html__('Name', 'easy-whatsapp'))),
 			wp_kses_post(sprintf('%1$s <span class="easy-whatsapp-required" aria-hidden="true">*</span>', esc_html__('Phone', 'easy-whatsapp'))),
 			esc_html__('Email (optional)', 'easy-whatsapp'),
-			esc_html__('Continue to WhatsApp', 'easy-whatsapp')
+			esc_html__('Continue to WhatsApp', 'easy-whatsapp'),
+			esc_html__('Saving your details...', 'easy-whatsapp')
 		);
 	}
 }
