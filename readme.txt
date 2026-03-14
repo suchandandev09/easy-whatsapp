@@ -14,7 +14,7 @@ Adds a WhatsApp number meta field to selected post types.
 
 Easy WhatsApp adds a secure, sanitized WhatsApp number field as post meta.
 
-You can choose one or multiple post types from **Settings > Easy WhatsApp**.
+You can choose one or multiple post types from **Easy WhatsApp > Settings**.
 
 By default, the field is enabled for the `post` post type.
 
@@ -26,14 +26,14 @@ Developers can still customize with a filter:
 
 1. Upload the `easy-whatsapp` folder to `/wp-content/plugins/`.
 2. Activate the plugin through the Plugins screen.
-3. Go to **Settings > Easy WhatsApp** and select post types.
+3. Go to **Easy WhatsApp > Settings** and select post types.
 4. Edit a selected post type item and fill in the "WhatsApp Number" meta box.
 
 == Frequently Asked Questions ==
 
 = Which post types are supported? =
 
-Select supported post types in **Settings > Easy WhatsApp**.
+Select supported post types in **Easy WhatsApp > Settings**.
 
 = What format should I use for numbers? =
 

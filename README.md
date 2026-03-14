@@ -16,7 +16,7 @@ A simple, secure, and lightweight WordPress plugin that adds a WhatsApp number m
 
 1. Upload the `easy-whatsapp` folder to your `/wp-content/plugins/` directory.
 2. Activate the plugin through the **Plugins** screen in WordPress.
-3. Go to **Settings > Easy WhatsApp** to select the post types where the field should be available.
+3. Go to **Easy WhatsApp > Settings** to select the post types where the field should be available.
 
 ## Usage
 
