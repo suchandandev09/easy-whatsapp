@@ -644,10 +644,36 @@ final class Easy_WhatsApp_Plugin
 		</svg>';
 
 		printf(
-			'<a href="#" class="easy-whatsapp-floating-button animate" data-number="%1$s" title="%2$s">%3$s</a>',
+			'<a href="#" class="easy-whatsapp-floating-button animate" data-number="%1$s" title="%2$s" aria-haspopup="dialog" aria-controls="easy-whatsapp-modal">%3$s</a>',
 			esc_attr($number),
 			esc_attr__('Message us on WhatsApp', 'easy-whatsapp'),
 			$svg_icon
+		);
+
+		printf(
+			'<div id="easy-whatsapp-modal" class="easy-whatsapp-modal" hidden>' .
+				'<div class="easy-whatsapp-modal-backdrop" data-easy-whatsapp-close="1"></div>' .
+				'<div class="easy-whatsapp-modal-content" role="dialog" aria-modal="true" aria-labelledby="easy-whatsapp-modal-title">' .
+				'<button type="button" class="easy-whatsapp-modal-close" data-easy-whatsapp-close="1" aria-label="%1$s">&times;</button>' .
+				'<h2 id="easy-whatsapp-modal-title">%2$s</h2>' .
+				'<form class="easy-whatsapp-lead-form" novalidate>' .
+				'<label for="easy-whatsapp-name">%3$s</label>' .
+				'<input type="text" id="easy-whatsapp-name" name="name" required />' .
+				'<label for="easy-whatsapp-phone">%4$s</label>' .
+				'<input type="tel" id="easy-whatsapp-phone" name="phone" required />' .
+				'<label for="easy-whatsapp-email">%5$s</label>' .
+				'<input type="email" id="easy-whatsapp-email" name="email" />' .
+				'<p class="easy-whatsapp-form-error" aria-live="polite"></p>' .
+				'<button type="submit" class="easy-whatsapp-submit">%6$s</button>' .
+				'</form>' .
+				'</div>' .
+				'</div>',
+			esc_attr__('Close popup', 'easy-whatsapp'),
+			esc_html__('Contact on WhatsApp', 'easy-whatsapp'),
+			wp_kses_post(sprintf('%1$s <span class="easy-whatsapp-required" aria-hidden="true">*</span>', esc_html__('Name', 'easy-whatsapp'))),
+			wp_kses_post(sprintf('%1$s <span class="easy-whatsapp-required" aria-hidden="true">*</span>', esc_html__('Phone', 'easy-whatsapp'))),
+			esc_html__('Email (optional)', 'easy-whatsapp'),
+			esc_html__('Continue to WhatsApp', 'easy-whatsapp')
 		);
 	}
 }
